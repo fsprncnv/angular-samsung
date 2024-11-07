@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
 
-declare var SamsungPay: {
+declare let SamsungPay: {
   notify(paymentResult: { status: string; provider: string }): any;
   loadPaymentSheet(
     paymentMethods: any,
@@ -9,12 +9,8 @@ declare var SamsungPay: {
       merchant: { name: string; url: string; id: string };
       amount: { option: string; currency: string; total: number };
     }
-  ): Promise<any>;
-  createButton(arg0: {
-    onClick: () => void;
-    buttonStyle: string;
-    type: string;
-  }): any;
+  ): any;
+  createButton(arg0: { onClick: any; buttonStyle: string; type: string }): any;
   isReadyToPay(paymentMethods: {
     version: string;
     serviceId: string;
@@ -46,7 +42,7 @@ export class SamsungPayComponent implements OnInit {
   public samsungPayClient!: typeof SamsungPay;
   public paymentMethods!: PaymentMethods;
 
-  constructor(private elementRef: ElementRef) {}
+  constructor(private readonly elementRef: ElementRef) {}
 
   async ngOnInit(): Promise<void> {
     this.loadScipt();
@@ -92,11 +88,9 @@ export class SamsungPayComponent implements OnInit {
       });
   }
 
-  ngAfterViewInit() {}
-
   createAndAddButton() {
     const samsungPayButton = this.samsungPayClient.createButton({
-      onClick: this.onSamsungPayButtonClicked,
+      onClick: () => this.onSamsungPayButtonClicked(),
       buttonStyle: 'black',
       type: 'buy',
     });
@@ -121,11 +115,26 @@ export class SamsungPayComponent implements OnInit {
       },
     };
 
+    this.loadSheet(transactionDetail);
+
+    // client?.loadPaymentSheet(this.paymentMethods, transactionDetail).then((paymentCredential: any) => {
+    //     console.log('paymentCredential: ', paymentCredential);
+    //     const paymentResult = {
+    //       status: 'CHARGED',
+    //       provider: 'PG Name',
+    //     };
+    //     client.notify(paymentResult);
+    //   })
+    //   .catch(function (error: any) {
+    //     console.log('error: ', error);
+    //   });
+  }
+
+  loadSheet(transactionDetail: any) {
     this.samsungPayClient
       .loadPaymentSheet(this.paymentMethods, transactionDetail)
       .then((paymentCredential: any) => {
         console.log('paymentCredential: ', paymentCredential);
-
         const paymentResult = {
           status: 'CHARGED',
           provider: 'PG Name',
